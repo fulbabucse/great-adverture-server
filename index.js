@@ -56,6 +56,13 @@ const dbConnect = async () => {
       res.send(result);
       console.log(result);
     });
+
+    app.get("/reviews", async (req, res) => {
+      const query = {};
+      const cursor = Reviews.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
   } finally {
   }
 };
