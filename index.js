@@ -28,10 +28,10 @@ const dbConnect = async () => {
       console.log(result);
     });
 
-    app.get("/services", async (req, res) => {
+    app.get("/home-services", async (req, res) => {
       const query = {};
       const cursor = Services.find(query);
-      const result = await cursor.toArray();
+      const result = await cursor.limit(3).toArray();
       res.send(result);
     });
   } finally {
