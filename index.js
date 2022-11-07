@@ -34,6 +34,13 @@ const dbConnect = async () => {
       const result = await cursor.limit(3).toArray();
       res.send(result);
     });
+
+    app.get("/services", async (req, res) => {
+      const query = {};
+      const cursor = Services.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
   } finally {
   }
 };
