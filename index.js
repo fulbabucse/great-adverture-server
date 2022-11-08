@@ -67,6 +67,18 @@ const dbConnect = async () => {
       const result = await cursor.toArray();
       res.send(result);
     });
+
+    app.get("/customerReview", async (req, res) => {
+      let query = {};
+      if (req.query.email) {
+        query = {
+          email: req.query.email,
+        };
+      }
+      const cursor = Reviews.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
   } finally {
   }
 };
