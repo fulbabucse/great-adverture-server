@@ -1,6 +1,7 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 const app = express();
 const port = process.env.PORT || 5000;
 require("dotenv").config();
@@ -12,6 +13,22 @@ app.get("/", (req, res) => {
   res.send("Great Adventure with Fahim Server Running");
 });
 
+const verifyJWT = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+  const token = authHeader.split(" ")[1];
+
+  jwt.verify(token, process.env.ACCESS_SECRET_TOKEN, (err, decoded) => {
+    if (err) {
+      return res.status(403).send({ message: "Forbidden access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
+
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.7ywptfp.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -22,6 +39,15 @@ const dbConnect = async () => {
   try {
     const Services = client.db("greatAdventure").collection("services");
     const Reviews = client.db("greatAdventure").collection("reviews");
+
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_SECRET_TOKEN, {
+        expiresIn: "1d",
+      });
+      res.send({ token });
+    });
+
     app.post("/service", async (req, res) => {
       const service = req.body;
       const result = await Services.insertOne(service);
@@ -67,7 +93,11 @@ const dbConnect = async () => {
       res.send(result);
     });
 
-    app.get("/customerReview", async (req, res) => {
+    app.get("/customerReview", verifyJWT, async (req, res) => {
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        res.status(403).send({ message: "Forbidden access" });
+      }
       let query = {};
       if (req.query.email) {
         query = {
