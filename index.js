@@ -26,7 +26,6 @@ const dbConnect = async () => {
       const service = req.body;
       const result = await Services.insertOne(service);
       res.send(result);
-      console.log(result);
     });
 
     app.get("/home-services", async (req, res) => {
@@ -85,7 +84,29 @@ const dbConnect = async () => {
       const query = { _id: ObjectId(id) };
       const result = await Reviews.deleteOne(query);
       res.send(result);
-      console.log(result);
+    });
+
+    app.get("/review/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await Reviews.findOne(query);
+      res.send(result);
+    });
+
+    app.put("/review/:id", async (req, res) => {
+      const id = req.params.id;
+      const review = req.body;
+      const query = { _id: ObjectId(id) };
+      const updatesReview = {
+        $set: {
+          review: review.review,
+          rating: review.rating,
+          createAt: review.createAt,
+          fullDateAndTime: review.fullDateAndTime,
+        },
+      };
+      const result = await Reviews.updateOne(query, updatesReview);
+      res.send(result);
     });
   } finally {
   }
