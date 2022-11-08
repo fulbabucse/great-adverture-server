@@ -54,11 +54,15 @@ const dbConnect = async () => {
       const review = req.body;
       const result = await Reviews.insertOne(review);
       res.send(result);
-      console.log(result);
     });
 
     app.get("/reviews", async (req, res) => {
-      const query = {};
+      let query = {};
+      if (req.query.serviceId) {
+        query = {
+          serviceId: req.query.serviceId,
+        };
+      }
       const cursor = Reviews.find(query);
       const result = await cursor.toArray();
       res.send(result);
