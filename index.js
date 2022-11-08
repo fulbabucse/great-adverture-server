@@ -79,6 +79,14 @@ const dbConnect = async () => {
       const result = await cursor.toArray();
       res.send(result);
     });
+
+    app.delete("/reviews/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await Reviews.deleteOne(query);
+      res.send(result);
+      console.log(result);
+    });
   } finally {
   }
 };
