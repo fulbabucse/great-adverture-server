@@ -105,7 +105,7 @@ const dbConnect = async () => {
         };
       }
       const cursor = Reviews.find(query);
-      const result = await cursor.toArray();
+      const result = await cursor.sort({ createAt: -1 }).toArray();
       res.send(result);
     });
 
