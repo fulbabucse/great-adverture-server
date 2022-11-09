@@ -62,10 +62,16 @@ const dbConnect = async () => {
     });
 
     app.get("/services", async (req, res) => {
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
       const query = {};
       const cursor = Services.find(query);
-      const result = await cursor.toArray();
-      res.send(result);
+      const services = await cursor
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      const count = await Services.estimatedDocumentCount();
+      res.send({ count, services });
     });
 
     app.get("/services/:id", async (req, res) => {
