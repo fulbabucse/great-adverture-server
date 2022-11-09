@@ -6,6 +6,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 require("dotenv").config();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -13,6 +14,7 @@ app.get("/", (req, res) => {
   res.send("Great Adventure with Fahim Server Running");
 });
 
+// JWT Token Verify
 const verifyJWT = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
@@ -29,17 +31,21 @@ const verifyJWT = (req, res, next) => {
   });
 };
 
+// Mongodb URL
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.7ywptfp.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
+
 const dbConnect = async () => {
   try {
+    // All Collections
     const Services = client.db("greatAdventure").collection("services");
     const Reviews = client.db("greatAdventure").collection("reviews");
 
+    // JWT Token From Client Side
     app.post("/jwt", (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_SECRET_TOKEN, {
@@ -48,12 +54,14 @@ const dbConnect = async () => {
       res.send({ token });
     });
 
+    // Service Create
     app.post("/service", async (req, res) => {
       const service = req.body;
       const result = await Services.insertOne(service);
       res.send(result);
     });
 
+    // Home page 3 Services added
     app.get("/home-services", async (req, res) => {
       const query = {};
       const cursor = Services.find(query);
@@ -61,6 +69,7 @@ const dbConnect = async () => {
       res.send(result);
     });
 
+    // All Services for Services page
     app.get("/services", async (req, res) => {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
@@ -74,6 +83,7 @@ const dbConnect = async () => {
       res.send({ count, services });
     });
 
+    // Every Single Service for Details
     app.get("/services/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
@@ -81,12 +91,14 @@ const dbConnect = async () => {
       res.send(result);
     });
 
+    // Create Review from Client side
     app.post("/review", async (req, res) => {
       const review = req.body;
       const result = await Reviews.insertOne(review);
       res.send(result);
     });
 
+    // All Reviews Display UI by Descending orders
     app.get("/reviews", async (req, res) => {
       let query = {};
       if (req.query.serviceId) {
@@ -99,6 +111,7 @@ const dbConnect = async () => {
       res.send(result);
     });
 
+    // Every Customer Review, Secure with JWT Token
     app.get("/customerReview", verifyJWT, async (req, res) => {
       const decoded = req.decoded;
       if (decoded.email !== req.query.email) {
@@ -115,6 +128,7 @@ const dbConnect = async () => {
       res.send(result);
     });
 
+    // Every single Reviews Delete from My Reviews
     app.delete("/reviews/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
@@ -122,6 +136,7 @@ const dbConnect = async () => {
       res.send(result);
     });
 
+    // Every Single Review get
     app.get("/review/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
@@ -129,6 +144,7 @@ const dbConnect = async () => {
       res.send(result);
     });
 
+    // Every Single Review for Updates
     app.put("/review/:id", async (req, res) => {
       const id = req.params.id;
       const review = req.body;
